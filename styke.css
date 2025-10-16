@@ -1,0 +1,33 @@
+/* assets/style.css */
+:root{
+  --primary: #00796b;
+  --muted: #f2f2f2;
+}
+
+body{ font-family: Arial, sans-serif; background:#fafafa; color:#222; padding:20px;}
+.container{ max-width:700px; margin:0 auto; background:white; padding:24px; border-radius:8px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.06);
+}
+
+h1{ font-size:20px; margin-bottom:16px; color:var(--primary); }
+
+label{ display:block; margin-bottom:12px; }
+input[type="text"], input[type="time"], input[type="file"]{
+  display:block; width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid #ddd;
+}
+
+.evidence .evidence-box{
+  border:1px dashed #cfcfcf; background:#f7f7f7; padding:12px; border-radius:8px; display:flex; gap:12px; align-items:center;
+}
+
+.evidence .icon{ font-size:28px; }
+.evidence .desc{ color:#666; font-size:14px; }
+
+.checkbox-label{ display:flex; gap:8px; align-items:center; margin-top:12px; }
+
+.buttons{ display:flex; gap:10px; margin-top:18px; }
+.btn{ padding:10px 16px; border-radius:8px; border:none; cursor:pointer; }
+.btn.cancel{ background:#eee; color:#333; }
+.btn.submit{ background:var(--primary); color:white; }
+
+.required{ color:#d00; }
