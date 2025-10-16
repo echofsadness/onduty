@@ -1,76 +1,61 @@
-// scripts/main.js
-const form = document.getElementById('dutyForm');
-
-form.addEventListener('submit', async (e) => {
+// scripts/main.js (แก้เป็นแบบนี้)
+document.getElementById('dutyForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  // validate: 2 images
-  const ev1 = document.getElementById('evidence1').files[0];
-  const ev2 = document.getElementById('evidence2').files[0];
-  if (!ev1 || !ev2){
-    Swal.fire('ผิดพลาด','กรุณาอัปโหลดรูปทั้งหมด 2 รูป','error');
+  const username = document.getElementById('username').value.trim();
+  const timeIn = document.getElementById('timeIn').value;
+  const timeOut = document.getElementById('timeOut').value;
+  const file1 = document.getElementById('evidence1').files[0];
+  const file2 = document.getElementById('evidence2').files[0];
+
+  if (!username || !timeIn || !timeOut || !file1 || !file2) {
+    Swal.fire('ผิดพลาด','กรุณากรอกข้อมูลให้ครบ','error');
     return;
   }
 
-  // read base64
-  const toBase64 = file => new Promise((res,rej)=>{
-    const reader = new FileReader();
-    reader.onload = () => res(reader.result.split(',')[1]);
-    reader.onerror = e => rej(e);
-    reader.readAsDataURL(file);
+  // ฟังก์ชันช่วยแปลงไฟล์เป็น base64 (dataURL)
+  const fileToDataURL = (file) => new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result);
+    fr.onerror = rej;
+    fr.readAsDataURL(file);
   });
 
-  try{
-    const b1 = await toBase64(ev1);
-    const b2 = await toBase64(ev2);
+  try {
+    Swal.fire({ title: 'กำลังเตรียมข้อมูล...', didOpen: () => Swal.showLoading() });
 
-    // สร้าง payload
-    const payload = {
-      action: 'submit',
-      username: document.getElementById('username').value.trim(),
-      timeIn: document.getElementById('timeIn').value,
-      timeOut: document.getElementById('timeOut').value,
-      evidence1: {name: ev1.name, data: b1},
-      evidence2: {name: ev2.name, data: b2},
-      timestamp: new Date().toISOString()
-    };
+    const dataurl1 = await fileToDataURL(file1); // "data:image/png;base64,...."
+    const dataurl2 = await fileToDataURL(file2);
 
-    // ยืนยันด้วย SweetAlert2
-    const result = await Swal.fire({
-      title: 'ยืนยันการส่ง?',
-      text: 'ข้อมูลจะถูกส่งไปให้แอดมินตรวจสอบ',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'ใช่ ส่งเลย',
-      cancelButtonText: 'ยกเลิก'
-    });
+    // สร้าง FormData — note: ไม่ตั้ง header เอง
+    const fd = new FormData();
+    fd.append('action', 'submit');
+    fd.append('username', username);
+    fd.append('timeIn', timeIn);
+    fd.append('timeOut', timeOut);
+    // ใส่ base64 เป็นสตริง (เป็น field ธรรมดา) — ป้องกัน preflight
+    fd.append('image1', dataurl1);
+    fd.append('image2', dataurl2);
 
-    if (!result.isConfirmed) return;
-
-    // แสดง loading
-    Swal.fire({ title: 'กำลังส่ง...', didOpen: ()=> Swal.showLoading() });
-
-    // --- เปลี่ยน URL นี้เป็น Google Apps Script Web App URL ของคุณ ---
+    // ส่งไป Apps Script (ไม่ตั้ง headers => browser sets multipart/form-data)
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHJ8KLLLAoqvYtBDskldvFnw1E1VdG_y2xrVXce7oUfP-un9JezsZ3a2CD5CoflBOV/exec';
-
-    const response = await fetch(APPS_SCRIPT_URL, {
+    const resp = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: fd,
     });
 
-    const respJson = await response.json();
+    const json = await resp.json();
     Swal.close();
 
-    if (respJson.status === 'ok'){
-      Swal.fire('ส่งสำเร็จ','ข้อมูลถูกส่งเรียบร้อยแล้ว','success');
-      form.reset();
+    if (json.status === 'success' || json.status === 'ok') {
+      Swal.fire('ส่งสำเร็จ', json.message || 'เรียบร้อย', 'success');
+      e.target.reset();
     } else {
-      Swal.fire('ผิดพลาด','ไม่สามารถส่งข้อมูลได้: ' + (respJson.message || 'unknown'),'error');
+      Swal.fire('ผิดพลาด', json.message || 'ไม่สามารถส่งได้', 'error');
     }
-
-  }catch(err){
+  } catch (err) {
     console.error(err);
-    Swal.fire('ผิดพลาด','เกิดข้อผิดพลาดขณะอ่านไฟล์หรือส่งข้อมูล','error');
+    Swal.fire('ผิดพลาด', 'เกิดข้อผิดพลาดขณะส่งข้อมูล', 'error');
   }
 });
+
