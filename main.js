@@ -38,7 +38,7 @@ document.getElementById('dutyForm').addEventListener('submit', async (e) => {
     fd.append('image2', dataurl2);
 
     // ส่งไป Apps Script (ไม่ตั้ง headers => browser sets multipart/form-data)
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwP8uH_PfbDwpRrteoNRG6gKk9uwFhssDSQRHY7rZXHRwYJtDg9HFdAFDeoeAsqlXdT/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhxpLk4LPIN3radyQO6mQSkZyGbL5pBzBb60_W4Qt8bmXajGj8XI3FMVipMAozxBjw/exec';
     const resp = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       body: fd,
