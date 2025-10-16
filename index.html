@@ -1,0 +1,59 @@
+<!-- index.html -->
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ลงเวร</title>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>ฟอร์มยืนยันการลงเวร</h1>
+
+    <form id="dutyForm">
+      <label>
+        ชื่อ (Roblox) <span class="required">*</span>
+        <input type="text" id="username" name="username" required />
+      </label>
+
+      <label>
+        เวลาเข้า <span class="required">*</span>
+        <input type="time" id="timeIn" name="timeIn" required />
+      </label>
+
+      <label>
+        เวลาออก <span class="required">*</span>
+        <input type="time" id="timeOut" name="timeOut" required />
+      </label>
+
+      <div class="evidence">
+        <div class="evidence-box">
+          <div class="icon">🖼️</div>
+          <div class="desc">
+            หลักฐานการปฏิบัติหน้าที่ (2 รูป) <span class="required">*</span>
+          </div>
+          <input type="file" id="evidence1" accept="image/*" required />
+          <input type="file" id="evidence2" accept="image/*" required />
+        </div>
+      </div>
+
+      <label class="checkbox-label">
+        <input type="checkbox" id="confirmTruth" required />
+        ข้าพเจ้ายืนยันว่าข้อมูลทั้งหมดนี้เป็นความจริง หากมิใช่ข้าพเจ้ายินยอมรับโทษ <span class="required">*</span>
+      </label>
+
+      <div class="buttons">
+        <button type="reset" class="btn cancel">ยกเลิก</button>
+        <button type="submit" class="btn submit">✔ ยืนยัน</button>
+      </div>
+    </form>
+  </main>
+
+  <script src="scripts/main.js"></script>
+</body>
+</html>
