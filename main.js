@@ -51,7 +51,7 @@ form.addEventListener('submit', async (e) => {
     Swal.fire({ title: 'กำลังส่ง...', didOpen: ()=> Swal.showLoading() });
 
     // --- เปลี่ยน URL นี้เป็น Google Apps Script Web App URL ของคุณ ---
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwv1LVe6-CFpRQfJRwe_Sk0BBKzOHsFviL2mwbmQcrdC5biIgQ2E0nUqVbuoEMCxcWl/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHJ8KLLLAoqvYtBDskldvFnw1E1VdG_y2xrVXce7oUfP-un9JezsZ3a2CD5CoflBOV/exec';
 
     const response = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
