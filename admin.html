@@ -1,0 +1,143 @@
+<!-- admin.html -->
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin - ยืนยันลงเวร</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Admin Panel</h1>
+
+    <div id="loginBox">
+      <label>ชื่อผู้ใช้
+        <input id="adminUser" />
+      </label>
+      <label>รหัสผ่าน
+        <input id="adminPass" type="password" />
+      </label>
+      <button id="btnLogin" class="btn submit">ลงชื่อเข้าใช้</button>
+    </div>
+
+    <div id="adminContent" style="display:none;">
+      <h2>คำขอยืนยันล่าสุด</h2>
+      <div id="pendingList"></div>
+      <div id="emptyPlaceholder" style="display:none; color:#888; padding:20px; border:1px dashed #ccc; border-radius:8px;">
+        ไม่มีข้อมูลที่ยืนยันล่าสุด
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFGRXsAyt_XKopAKfKxKpLuCOuWqKy3rowY4OO8i8U1A5xALxs3OHYY7sgmPHyqkGr/exec';
+    // โหลด creds.json (เฉพาะตัวอย่าง local) — ถ้าไม่มี ให้ login ผ่าน token server-side แทน
+    async function loadCreds(){
+      try {
+        const r = await fetch('creds.json');
+        return await r.json();
+      } catch(e) {
+        return null;
+      }
+    }
+
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+      const u = document.getElementById('adminUser').value;
+      const p = document.getElementById('adminPass').value;
+      const creds = await loadCreds();
+
+      if (!creds) {
+        Swal.fire('แจ้ง','creds.json ไม่พบ — วิธีนี้ใช้ได้แค่ local ทดลองเท่านั้น กรุณาใช้ token/server-side','warning');
+        return;
+      }
+
+      if (u === creds.username && p === creds.password){
+        sessionStorage.setItem('adminToken', creds.adminToken);
+        enterAdmin();
+      } else {
+        Swal.fire('ผิดพลาด','ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง','error');
+      }
+    });
+
+    function enterAdmin(){
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('adminContent').style.display = 'block';
+      fetchPending();
+    }
+
+    async function fetchPending(){
+      const token = sessionStorage.getItem('adminToken') || '';
+      const url = APPS_SCRIPT_URL + '?action=getPending&token=' + encodeURIComponent(token);
+
+      const res = await fetch(url);
+      const data = await res.json();
+      const list = document.getElementById('pendingList');
+      list.innerHTML = '';
+
+      if (!data || !data.items || data.items.length === 0){
+        document.getElementById('emptyPlaceholder').style.display = 'block';
+        return;
+      } else {
+        document.getElementById('emptyPlaceholder').style.display = 'none';
+      }
+
+      data.items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'pending-card';
+        card.style.border = '1px solid #eee';
+        card.style.padding = '12px';
+        card.style.marginBottom = '12px';
+        card.style.borderRadius = '8px';
+        card.innerHTML = `
+          <strong>${item.username}</strong> — ${item.timestamp}<br/>
+          เวลาเข้า: ${item.timeIn} | เวลาออก: ${item.timeOut}
+          <div style="margin-top:8px;">
+            <img src="${item.evidence1}" style="max-width:150px; margin-right:8px;" />
+            <img src="${item.evidence2}" style="max-width:150px;" />
+          </div>
+          <div style="margin-top:8px;">
+            <button class="btn reject" data-id="${item.id}">✖ ไม่อนุมัติ</button>
+            <button class="btn approve" data-id="${item.id}">✔ อนุมัติ</button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+
+      // attach events
+      document.querySelectorAll('.approve').forEach(btn=>{
+        btn.addEventListener('click', () => handleAction(btn.dataset.id, true));
+      });
+      document.querySelectorAll('.reject').forEach(btn=>{
+        btn.addEventListener('click', () => handleAction(btn.dataset.id, false));
+      });
+    }
+
+    async function handleAction(id, isApprove){
+      const token = sessionStorage.getItem('adminToken') || '';
+      const actionName = isApprove ? 'approve' : 'reject';
+      const conf = await Swal.fire({
+        title: isApprove ? 'ยืนยันอนุมัติ?' : 'ยืนยันไม่อนุมัติ?',
+        showCancelButton:true,
+        confirmButtonText: 'ใช่'
+      });
+      if (!conf.isConfirmed) return;
+
+      const resp = await fetch(APPS_SCRIPT_URL, {
+        method:'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ action: actionName, id, token })
+      });
+      const json = await resp.json();
+      if (json.status === 'ok') {
+        Swal.fire('สำเร็จ', json.message || 'เสร็จแล้ว', 'success');
+        fetchPending(); // รีเฟรชลิสต์
+      } else {
+        Swal.fire('ผิดพลาด', json.message || 'error', 'error');
+      }
+    }
+
+  </script>
+</body>
+</html>
