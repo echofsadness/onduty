@@ -36,8 +36,7 @@ document.getElementById('dutyForm').addEventListener('submit', async (e) => {
 
     // --- เปลี่ยนตรงนี้เป็น APPS_SCRIPT_URL ของคุณ ---
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhxpLk4LPIN3radyQO6mQSkZyGbL5pBzBb60_W4Qt8bmXajGj8XI3FMVipMAozxBjw/exec';
-    // ใช้ corsproxy.io (ง่ายสุดชั่วคราว)
-    const proxy = 'https://corsproxy.io/?' + encodeURIComponent(APPS_SCRIPT_URL);
+   const proxy = 'https://thingproxy.freeboard.io/fetch/' + APPS_SCRIPT_URL;
 
     const resp = await fetch(proxy, {
       method: 'POST',
