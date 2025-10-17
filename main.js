@@ -36,16 +36,16 @@ document.getElementById('dutyForm').addEventListener('submit', async (e) => {
 
     // --- เปลี่ยนตรงนี้เป็น APPS_SCRIPT_URL ของคุณ ---
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhxpLk4LPIN3radyQO6mQSkZyGbL5pBzBb60_W4Qt8bmXajGj8XI3FMVipMAozxBjw/exec';
-   const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(APPS_SCRIPT_URL);
-
-const resp = await fetch(proxy, {
-  method: 'POST',
-  body: fd
-});
-
-const json = await resp.json();
-console.log(json);
-
+    const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(APPS_SCRIPT_URL);
+    
+    const resp = await fetch(proxy, {
+      method: 'POST',
+      body: fd
+    });
+    
+    const json = await resp.json();
+    console.log(json);
+    
     if (json.status === 'ok' || json.status === 'success') {
       Swal.fire('ส่งสำเร็จ', json.message || 'เรียบร้อย', 'success');
       e.target.reset();
